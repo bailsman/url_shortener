@@ -1,12 +1,21 @@
 version: '3'
 
 services:
+  db:
+    image: postgres:alpine
+    volumes: 
+        - data:/var/lib/postgresql/data
   web:
     build: .
     environment:
-      FLASK_APP: hello.py
+      DATABASE_URL: postgresql://postgres:postgres@db/
     command: python3 -m flask run --host=0.0.0.0
     volumes:
       - .:/code
     ports:
       - "80:5000"
+    depends_on:
+      - db
+
+volumes:
+  data:
