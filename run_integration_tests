@@ -1,0 +1,21 @@
+#!/bin/bash
+
+set -o nounset
+set -o errexit
+shopt -s nullglob
+
+docker-compose -f docker-compose.testing.yml build
+
+failures=0
+# Each test file is assumed to require fresh containers
+# Database is on a tmpfs so is cleaned out every run as well
+for testfile in tests/integration/*.py; do
+  docker-compose -f docker-compose.testing.yml start
+  docker-compose -f docker-compose.testing.yml run --rm pytest /bin/sh -c '/test/wait-for "$APP_HOST" -t 10'
+  if docker-compose -f docker-compose.testing.yml run --rm pytest pytest "/test/${testfile##*/}"; then
+    ((failures++))
+  fi
+  docker-compose -f docker-compose.testing.yml stop
+done
+
+exit $failures

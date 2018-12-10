@@ -1,0 +1,22 @@
+version: '3'
+
+services:
+  testdb:
+    image: postgres:alpine
+    tmpfs: /var/lib/postgresql/data
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile.production
+    environment:
+      DATABASE_URL: postgresql://postgres:postgres@testdb/
+    command: gunicorn --bind 0.0.0.0:8000 wsgi
+    depends_on:
+      - testdb
+  pytest:
+    build: ./tests/integration
+    depends_on:
+      - app
+    environment:
+      APP_HOST: app:8000
+      APP_PATH: /

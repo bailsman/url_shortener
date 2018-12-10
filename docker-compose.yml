@@ -1,21 +1,21 @@
 version: '3'
 
 services:
-  db:
+  devdb:
     image: postgres:alpine
     volumes: 
         - data:/var/lib/postgresql/data
-  web:
+  devapp:
     build: .
     environment:
-      DATABASE_URL: postgresql://postgres:postgres@db/
+      DATABASE_URL: postgresql://postgres:postgres@devdb/
     command: python3 -m flask run --host=0.0.0.0
     volumes:
       - .:/code
     ports:
-      - "80:5000"
+      - "5000:5000"
     depends_on:
-      - db
+      - devdb
 
 volumes:
   data:
