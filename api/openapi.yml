@@ -1,0 +1,80 @@
+openapi: "3.0.0"
+info:
+  version: 1.0.0
+  title: Greeting App
+paths:
+  /{id}:
+    get:
+      summary: Read a single greeting
+      operationId: api.greeting.get
+      tags:
+        - Greeting
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The id of the greeting to retrieve
+          schema:
+            type: integer
+            format: int32
+      responses:
+        '200':
+          description: Successfully read greeting
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Greeting"
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /newgreeting:
+    post:
+      summary: Store a new greeting
+      operationId: api.greeting.create
+      tags:
+        - Greeting
+      requestBody:
+        description: Greeting to store
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Greeting'
+      responses:
+        '201':
+          description: Successfully stored greeting
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Greeting"
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+components:
+  schemas:
+    Greeting:
+      required:
+        - text
+      properties:
+        id:
+          type: integer
+          format: int32
+        text:
+          type: string
+    Error:
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: integer
+          format: int32
+        message:
+          type: string
