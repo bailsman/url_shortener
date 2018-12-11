@@ -1,73 +1,120 @@
 openapi: "3.0.0"
 info:
-  version: 1.0.0
-  title: Greeting App
+  version: "1.0.0"
+  title: Url Shortener
 paths:
-  /{id}:
-    get:
-      summary: Read a single greeting
-      operationId: api.greeting.get
-      tags:
-        - Greeting
-      parameters:
-        - name: id
-          in: path
-          required: true
-          description: The id of the greeting to retrieve
-          schema:
-            type: integer
-            format: int32
-      responses:
-        '200':
-          description: Successfully read greeting
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Greeting"
-        default:
-          description: unexpected error
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
-  /newgreeting:
+  /shorten:
     post:
-      summary: Store a new greeting
-      operationId: api.greeting.create
+      summary: Create a new shorturl
+      operationId: api.shorturl.create
       tags:
-        - Greeting
+        - Shorturl
       requestBody:
-        description: Greeting to store
+        description: Shorturl to create
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Greeting'
+              $ref: '#/components/schemas/Shorturl'
       responses:
         '201':
-          description: Successfully stored greeting
+          description: Successfully created shorturl
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Greeting"
+                $ref: "#/components/schemas/ShortcodeJSON"
         default:
           description: unexpected error
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/Error"
-
+  /{shortcode}:
+    parameters:
+      - in: path
+        name: shortcode
+        schema:
+          $ref: "#/components/schemas/shortcode"
+        required: true
+    get:
+      summary: Get redirected with a shortcode
+      operationId: api.shorturl.redirect
+      tags:
+        - Shorturl
+      responses:
+        '302':
+          description: Redirect to the full URL associated with this shortcode
+        default:
+          description: shortcode not found or other error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /{shortcode}/stats:
+    parameters:
+      - in: path
+        name: shortcode
+        schema:
+          $ref: "#/components/schemas/shortcode"
+        required: true
+    get:
+      summary: Get statistics for a shortcode
+      operationId: api.shorturl.stats
+      tags:
+        - Shorturl
+      responses:
+        '200':
+          description: Statistics for the shortcode
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ShorturlStats"
+        default:
+          description: shortcode not found or other error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
 components:
   schemas:
-    Greeting:
+    shortcode:
+      type: string
+      minLength: 6
+      maxLength: 6
+      pattern: "^[a-zA-Z0-9_]*$"
+    Shorturl:
       required:
-        - text
+        - url
       properties:
-        id:
+        url:
+          type: string
+          format: uri
+        shortcode:
+          $ref: "#/components/schemas/shortcode"
+      example:
+        url: 'http://www.example.com'
+        shortcode: 'qwerty'
+    ShorturlStats:
+      required:
+        - created
+        - lastRedirect
+        - redirectCount
+      properties:
+        created:
+          type: string
+          format: date-time
+        lastRedirect:
+          type: string
+          format: date-time
+        redirectCount:
           type: integer
           format: int32
-        text:
-          type: string
+    ShortcodeJSON:
+      required:
+        - shortcode
+      properties:
+        shortcode:
+          $ref: "#/components/schemas/shortcode"
     Error:
       required:
         - code

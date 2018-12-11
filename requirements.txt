@@ -6,3 +6,4 @@ Flask-Marshmallow
 marshmallow-sqlalchemy
 connexion[swagger-ui]
 gunicorn
+pytest-flask-sqlalchemy
