@@ -1,4 +1,5 @@
 from app import db, ma
+from api.common import Error, ErrorSchema
 
 class Greeting(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -13,6 +14,8 @@ class GreetingSchema(ma.ModelSchema):
 
 def get(id):
     greeting = Greeting.query.get(id)
+    if greeting is None:
+        return ErrorSchema().dump(Error(1, 'Specified greeting not found.')).data, 404
     return GreetingSchema().dump(greeting).data
 
 def create(body):
